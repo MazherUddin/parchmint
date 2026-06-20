@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parchmint — the Markdown editor for documents AI reads</title>
+  <meta name="description" content="Parchmint shows the honest preview an LLM actually sees — every token, every warning — so your prompts, skill files, and docs land exactly as written. Free, open source, local-first." />
+
+  <meta property="og:title" content="Parchmint — Markdown, as the model reads it" />
+  <meta property="og:description" content="The honest-preview Markdown editor for documents meant to be read by AI." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="margin-rule" aria-hidden="true"></div>
+
+  <!-- ░░ NAV ░░ -->
+  <header class="nav">
+    <a class="wordmark" href="#top">
+      <span class="seal-dot" aria-hidden="true"></span>
+      Parchmint
+    </a>
+    <nav class="nav-links">
+      <a href="#what">The idea</a>
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+      <a href="https://github.com/MazherUddin/parchmint" class="nav-gh">Source ↗</a>
+    </nav>
+    <span class="version-badge">v0.1.0 · MIT</span>
+  </header>
+
+  <!-- ░░ HERO ░░ -->
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow reveal" style="--d:0ms">Markdown for machine readers</p>
+        <h1 class="reveal" style="--d:80ms">
+          Markdown,<br />as the <em>model</em> reads it.
+        </h1>
+        <p class="lede reveal" style="--d:180ms">
+          Parchmint shows the <strong>honest preview</strong> an LLM actually sees —
+          every token, every warning — so your prompts, skill files, and docs land
+          exactly as written. No formatting surprises at inference time.
+        </p>
+        <div class="cta-row reveal" style="--d:280ms">
+          <a class="btn btn-primary" href="#download">
+            Download
+            <span class="btn-sub">Win · macOS · Linux</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/MazherUddin/parchmint">View the source</a>
+        </div>
+        <p class="cta-note reveal" style="--d:360ms">
+          Free &amp; open source · Local-first · No account, no telemetry
+        </p>
+      </div>
+
+      <!-- editor mock -->
+      <div class="hero-art reveal" style="--d:240ms">
+        <div class="stamp" aria-hidden="true">
+          <span>Honest</span><span>Preview</span>
+        </div>
+        <figure class="editor" aria-label="Parchmint editor preview">
+          <div class="editor-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="editor-file">skill.md</span>
+            <span class="editor-mode">SPLIT</span>
+          </div>
+          <div class="editor-body">
+            <div class="pane pane-src">
+              <div class="pane-tag">you write</div>
+<pre><code><span class="t-fence">---</span>
+<span class="t-key">name</span>: honest-preview
+<span class="t-key">description</span>: what you see is what
+  the model gets
+<span class="t-fence">---</span>
+
+<span class="t-h">## What the model reads</span>
+
+<span class="t-li">- [x]</span> every token counted
+<span class="t-li">- [ ]</span> nothing hidden
+
+Write <span class="t-strong">**once**</span>, ship clean.</code></pre>
+            </div>
+            <div class="pane pane-prev">
+              <div class="pane-tag">the model reads</div>
+              <div class="prev-doc">
+                <h4>What the model reads</h4>
+                <ul class="task">
+                  <li class="done"><i></i> every token counted</li>
+                  <li><i></i> nothing hidden</li>
+                </ul>
+                <p>Write <b>once</b>, ship clean.</p>
+                <div class="tokens">
+                  <span>What</span><span>the</span><span>model</span><span>reads</span><span class="tk">·</span><span>every</span><span>token</span><span>count</span><span>ed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="editor-foot">
+            <span class="meter"><span class="meter-dot"></span> 1,248 tokens</span>
+            <span class="meter-ok">0 warnings</span>
+            <span class="meter-type">type: skill</span>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ░░ THE IDEA ░░ -->
+    <section id="what" class="idea">
+      <p class="section-kicker">01 — The idea</p>
+      <h2 class="reveal-on-scroll">
+        What you see is<br />what the model <em>gets.</em>
+      </h2>
+      <p class="idea-lede reveal-on-scroll">
+        Most editors render Markdown for <em>your</em> eyes — pretty headings, hidden
+        whitespace, silent assumptions. But your reader is a language model. Parchmint
+        renders the document the way a tokenizer parses it, surfaces the token budget,
+        and flags the structure that quietly breaks prompts. You stop guessing what the
+        model sees. You just look.
+      </p>
+      <div class="idea-flow">
+        <div class="flow-card reveal-on-scroll">
+          <span class="flow-tag">Source</span>
+          <pre><code><span class="t-h">## Context</span>
+You are a <span class="t-strong">**precise**</span> editor.
+<span class="t-li">- [ ]</span> verify each claim</code></pre>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-card reveal-on-scroll">
+          <span class="flow-tag">As tokenized</span>
+          <div class="tokens big">
+            <span>##</span><span>Context</span><span>You</span><span>are</span><span>a</span><span>precise</span><span>editor</span><span>.</span><span>verify</span><span>each</span><span>claim</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ░░ FEATURES ░░ -->
+    <section id="features" class="features">
+      <p class="section-kicker">02 — What's inside</p>
+      <h2 class="reveal-on-scroll">A workshop for documents<br />with a machine audience.</h2>
+      <div class="feature-grid">
+        <article class="feature reveal-on-scroll">
+          <span class="f-num">01</span>
+          <h3>Honest preview</h3>
+          <p>A render that matches what the tokenizer parses — not a prettied-up illusion. Pseudo-tags and raw HTML are shown plainly.</p>
+        </article>
+        <article class="feature reveal-on-scroll">
+          <span class="f-num">02</span>
+          <h3>Token meter &amp; warnings</h3>
+          <p>Live token count as you type, with token-level warnings before a document blows past the budget you're writing for.</p>
+        </article>
+        <article class="feature reveal-on-scroll">
+          <span class="f-num">03</span>
+          <h3>Lint &amp; validate</h3>
+          <p>Document-type detection plus structural linting catches the broken outlines and malformed frontmatter that quietly derail prompts.</p>
+        </article>
+        <article class="feature reveal-on-scroll">
+          <span class="f-num">04</span>
+          <h3>Outline &amp; navigation</h3>
+          <p>A live outline of every heading. Jump the cursor anywhere — or right-click the preview and edit the exact line you clicked.</p>
+        </article>
+        <article class="feature reveal-on-scroll">
+          <span class="f-num">05</span>
+          <h3>Mermaid · KaTeX · code</h3>
+          <p>Diagrams, math, and syntax-highlighted fences render inline. Three view modes — source, split, preview — a keystroke apart.</p>
+        </article>
+        <article class="feature reveal-on-scroll">
+          <span class="f-num">06</span>
+          <h3>Local-first &amp; fast</h3>
+          <p>Built on Tauri and Rust. Your files stay on disk, external changes are detected, and nothing phones home. Ever.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ░░ DOWNLOAD ░░ -->
+    <section id="download" class="download">
+      <p class="section-kicker">03 — Take it home</p>
+      <h2 class="reveal-on-scroll">Download Parchmint</h2>
+      <p class="dl-lede reveal-on-scroll">Free, open source, MIT-licensed. Pick your platform — every build comes from the latest release.</p>
+      <div class="dl-grid">
+        <a class="dl-card reveal-on-scroll" href="https://github.com/MazherUddin/parchmint/releases/latest">
+          <span class="dl-os">Windows</span>
+          <span class="dl-file">.msi installer</span>
+          <span class="dl-note">Unsigned — SmartScreen → “More info → Run anyway”</span>
+        </a>
+        <a class="dl-card reveal-on-scroll" href="https://github.com/MazherUddin/parchmint/releases/latest">
+          <span class="dl-os">macOS</span>
+          <span class="dl-file">.dmg · signed &amp; notarized</span>
+          <span class="dl-note">Apple-notarized — opens with a double-click</span>
+        </a>
+        <a class="dl-card reveal-on-scroll" href="https://github.com/MazherUddin/parchmint/releases/latest">
+          <span class="dl-os">Linux</span>
+          <span class="dl-file">.AppImage · .deb</span>
+          <span class="dl-note">Runs as-is, no signing gate</span>
+        </a>
+      </div>
+      <p class="dl-build reveal-on-scroll">
+        Or build from source: <code>npm install &amp;&amp; npm run tauri build</code>
+      </p>
+    </section>
+  </main>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="foot">
+    <div class="foot-mark">
+      <span class="seal-dot" aria-hidden="true"></span> Parchmint
+    </div>
+    <p class="foot-line">Crafted on parchment · read by machines.</p>
+    <nav class="foot-links">
+      <a href="https://github.com/MazherUddin/parchmint">GitHub</a>
+      <a href="https://github.com/MazherUddin/parchmint/releases/latest">Releases</a>
+      <a href="https://github.com/MazherUddin/parchmint/blob/main/LICENSE">MIT License</a>
+    </nav>
+    <p class="foot-copy">© 2026 Abu Mazher Uddin. Released under the MIT License.</p>
+  </footer>
+
+  <script>
+    // Reveal sections as they scroll into view (no-op under reduced motion).
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        }
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.12 }
+    );
+    document.querySelectorAll(".reveal-on-scroll").forEach((el, i) => {
+      el.style.transitionDelay = (i % 6) * 60 + "ms";
+      io.observe(el);
+    });
+  </script>
+</body>
+</html>

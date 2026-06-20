@@ -1,0 +1,52 @@
+{
+  "name": "parchmint",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A Markdown editor for AI-consumed documents — write docs, prompts, and skill files with an honest preview of exactly what the model will read.",
+  "author": "Abu Mazher Uddin <mazher@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://parchmint.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MazherUddin/parchmint.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "release": "pwsh ./scripts/release.ps1"
+  },
+  "dependencies": {
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/merge": "^6.7.0",
+    "@codemirror/view": "^6.26.0",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-store": "^2.4.3",
+    "@uiw/react-codemirror": "^4.25.10",
+    "@vscode/markdown-it-katex": "^1.1.2",
+    "dompurify": "^3.4.6",
+    "gpt-tokenizer": "^3.4.0",
+    "highlight.js": "^11.11.1",
+    "js-yaml": "^4.1.1",
+    "katex": "^0.17.0",
+    "markdown-it": "^14.2.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "^11.15.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/markdown-it": "^14.1.2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  }
+}
