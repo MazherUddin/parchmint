@@ -188,6 +188,24 @@ pub fn run() {
                     *slot = Some(path);
                 }
             }
+
+            // Per-OS window background material. Windows keeps Mica; macOS gets
+            // vibrancy; Linux has no native equivalent and stays opaque (handled
+            // in CSS via the os-linux class). transparent:true (in tauri.conf)
+            // is required for both Mica and vibrancy.
+            #[cfg(any(target_os = "windows", target_os = "macos"))]
+            if let Some(win) = app.get_webview_window("main") {
+                #[cfg(target_os = "windows")]
+                let _ = window_vibrancy::apply_mica(&win, None);
+                #[cfg(target_os = "macos")]
+                let _ = window_vibrancy::apply_vibrancy(
+                    &win,
+                    window_vibrancy::NSVisualEffectMaterial::Sidebar,
+                    None,
+                    None,
+                );
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -199,6 +217,24 @@ pub fn run() {
             take_launch_file,
             set_watch_roots
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app, _event| {
+            // macOS delivers files opened from Finder (or `open file.md`) as Apple
+            // Events, not argv. Mirror the argv path used on Windows/Linux: stash
+            // the file for the frontend to pull on mount (cold start) and emit
+            // open-file for the already-running case.
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Opened { urls } = _event {
+                for url in urls {
+                    if let Ok(path) = url.to_file_path() {
+                        let p = path.to_string_lossy().to_string();
+                        if let Ok(mut slot) = _app.state::<LaunchFile>().0.lock() {
+                            *slot = Some(p.clone());
+                        }
+                        let _ = _app.emit("open-file", p);
+                    }
+                }
+            }
+        });
 }

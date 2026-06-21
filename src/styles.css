@@ -60,6 +60,22 @@ body,
   background: transparent;
 }
 
+/* Linux has no native window material (no Mica/vibrancy), and a transparent
+   window there would show the desktop through the translucent chrome. Make the
+   window opaque: solid base + opaque chrome surfaces. Windows/macOS keep the
+   translucent surfaces so the native material shows through. */
+.os-linux,
+.os-linux body,
+.os-linux #root,
+.os-linux .app {
+  background: var(--bg-muted);
+}
+
+.os-linux {
+  --surface: var(--bg-muted);
+  --surface-strong: var(--bg-muted);
+}
+
 body {
   font-family: var(--font-ui);
   color: var(--text);

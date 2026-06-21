@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Cross-platform support (macOS + Linux alongside Windows): per-OS window
+  material — Mica on Windows, vibrancy on macOS, opaque on Linux — and macOS
+  Finder file-open via Apple Events (`.md` double-click parity). See ADR-0006.
+- About dialog (icon, version, maintainer attribution, Website/GitHub/License
+  links) reachable from the status bar and the shortcuts sheet.
+
 ## [0.1.0] - 2026-06-20
 
 Initial public release.
