@@ -1,7 +1,8 @@
 # Lightweight build check so a PR (or a push to main) can't silently break the
-# build. Compiles the frontend and the Rust app on Linux + Windows. macOS is
-# left to the release workflow to conserve Actions minutes (mac runners bill 10x;
-# the macOS-specific code paths are cfg-gated and only fully compile on a Mac).
+# build. Compiles the frontend and runs `cargo check` on Linux, Windows, and
+# macOS. macOS is included so the cfg-gated mac-only paths (vibrancy + Apple
+# Events file-open) are verified here rather than only at release time. Note:
+# macOS runners bill at 10x Actions minutes on private repos (free once public).
 name: CI
 
 on:
@@ -19,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-22.04, windows-latest]
+        platform: [ubuntu-22.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
