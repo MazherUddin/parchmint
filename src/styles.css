@@ -1544,3 +1544,81 @@ body.dragging-col {
   background: var(--accent-soft);
   color: var(--accent);
 }
+
+/* About dialog — shares the .help-overlay / .help-dialog frame */
+.about-dialog {
+  width: min(380px, 100%);
+}
+
+.about-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 26px 24px 22px;
+  gap: 5px;
+}
+
+.about-icon {
+  border-radius: 16px;
+  margin-bottom: 8px;
+}
+
+.about-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.about-tagline {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  max-width: 260px;
+}
+
+.about-version {
+  font-size: 12px;
+  color: var(--text-muted);
+  min-height: 16px;
+}
+
+.about-author {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 10px;
+}
+
+.about-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.about-sep {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.about-link {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--accent);
+  padding: 2px 0;
+}
+
+.about-link:hover {
+  text-decoration: underline;
+}
+
+.about-foot {
+  justify-content: center;
+}
+
+.help-foot-spacer {
+  flex: 1;
+}

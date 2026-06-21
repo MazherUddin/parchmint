@@ -11,6 +11,7 @@ import { ConflictBanner } from "./components/ConflictBanner";
 import type { ConflictKind } from "./components/ConflictBanner";
 import { ConflictCompare } from "./components/ConflictCompare";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
+import { AboutDialog } from "./components/AboutDialog";
 import { renderPreview } from "./lib/preview";
 import { toggleTaskLine } from "./lib/taskToggle";
 import { countTokens } from "./lib/tokens";
@@ -180,6 +181,7 @@ export default function App() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isZen, setIsZen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   // Latest values mirrored into refs so the filesystem-change subscription (set
   // up once) always reconciles against current state without re-subscribing.
@@ -995,9 +997,19 @@ export default function App() {
           onChangeType={handleChangeType}
           warnings={allWarnings}
           onShowHelp={() => setHelpOpen(true)}
+          onShowAbout={() => setAboutOpen(true)}
         />
       )}
-      {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
+      {helpOpen && (
+        <ShortcutsHelp
+          onClose={() => setHelpOpen(false)}
+          onAbout={() => {
+            setHelpOpen(false);
+            setAboutOpen(true);
+          }}
+        />
+      )}
+      {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
       {compareDoc && compareDoc.incomingDisk != null && (
         <ConflictCompare
           mine={compareDoc.content}

@@ -3,6 +3,7 @@ import { SHORTCUT_GROUPS, isMacPlatform, formatToken } from "../lib/shortcuts";
 
 interface ShortcutsHelpProps {
   onClose: () => void;
+  onAbout: () => void;
 }
 
 /**
@@ -11,7 +12,7 @@ interface ShortcutsHelpProps {
  * ConflictCompare modal pattern. Owns Escape while open and stops it propagating
  * so closing the sheet never also drops the user out of zen mode.
  */
-export function ShortcutsHelp({ onClose }: ShortcutsHelpProps) {
+export function ShortcutsHelp({ onClose, onAbout }: ShortcutsHelpProps) {
   const mac = useMemo(() => isMacPlatform(), []);
 
   useEffect(() => {
@@ -65,7 +66,13 @@ export function ShortcutsHelp({ onClose }: ShortcutsHelpProps) {
           ))}
         </div>
         <div className="help-foot">
-          Press <kbd>{formatToken("mod", mac)}</kbd><kbd>/</kbd> any time to reopen this.
+          <span>
+            Press <kbd>{formatToken("mod", mac)}</kbd><kbd>/</kbd> any time to reopen this.
+          </span>
+          <span className="help-foot-spacer" />
+          <button className="about-link" onClick={onAbout}>
+            About Parchmint
+          </button>
         </div>
       </div>
     </div>

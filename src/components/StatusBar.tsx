@@ -13,9 +13,10 @@ interface StatusBarProps {
   onChangeType: (type: DocType | null) => void;
   warnings: LintWarning[];
   onShowHelp: () => void;
+  onShowAbout: () => void;
 }
 
-export function StatusBar({ tokens, chars, lines, path, detected, override, onChangeType, warnings, onShowHelp }: StatusBarProps) {
+export function StatusBar({ tokens, chars, lines, path, detected, override, onChangeType, warnings, onShowHelp, onShowAbout }: StatusBarProps) {
   const [warningsOpen, setWarningsOpen] = useState(false);
   const count = warnings.length;
 
@@ -74,6 +75,9 @@ export function StatusBar({ tokens, chars, lines, path, detected, override, onCh
           </>
         )}
       </div>
+      <button className="help-button" title="About Parchmint" onClick={onShowAbout}>
+        ⓘ
+      </button>
       <button className="help-button" title="Shortcuts & help (Ctrl / ⌘ + /)" onClick={onShowHelp}>
         ?
       </button>
