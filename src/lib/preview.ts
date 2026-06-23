@@ -1,5 +1,7 @@
 import DOMPurify from "dompurify";
 import mermaid from "mermaid";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { resolve } from "@tauri-apps/api/path";
 import { renderMarkdown } from "./markdown";
 import { KNOWN_HTML_TAGS } from "./htmlTags";
 
@@ -98,15 +100,44 @@ async function renderMermaidIn(container: HTMLElement): Promise<void> {
   }
 }
 
+// True for paths we must resolve against the document folder. Remote/data/blob
+// URLs and in-page anchors already work and are left untouched.
+const LOCAL = (s: string) =>
+  !!s && !/^(https?:|data:|blob:|asset:|tauri:|mailto:|#)/i.test(s);
+
+// Rewrite local image src to a Tauri asset URL so the webview can stream the
+// file from disk. Runs after DOMPurify so the generated asset:/tauri: scheme
+// isn't stripped by the sanitiser; the original relative src survives sanitize
+// untouched. Skipped for unsaved docs (no folder to resolve against).
+async function rewriteLocalImages(container: HTMLElement, docDir: string | null): Promise<void> {
+  if (!docDir) return;
+  const imgs = Array.from(container.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map(async (img) => {
+      const raw = img.getAttribute("src");
+      if (!raw || !LOCAL(raw)) return;
+      try {
+        const decoded = decodeURIComponent(raw);
+        const abs = await resolve(docDir, decoded); // OS-correct join; handles ../ and absolute
+        img.setAttribute("src", convertFileSrc(abs));
+      } catch {
+        /* leave broken; linter already flags missing targets */
+      }
+    }),
+  );
+}
+
 // Render Markdown → HTML, transform pseudo-tags, sanitize the markdown output,
 // then render mermaid diagrams into the sanitized HTML. Mermaid's SVG is added
 // after sanitization (it's already sanitised by mermaid in strict mode).
-export async function renderPreview(source: string): Promise<string> {
+// Local image src are rewritten to Tauri asset URLs (also post-sanitize).
+export async function renderPreview(source: string, docDir: string | null = null): Promise<string> {
   const rawHtml = renderMarkdown(source);
   const doc = new DOMParser().parseFromString(rawHtml, "text/html");
   transformPseudoTags(doc.body);
   const sanitized = DOMPurify.sanitize(doc.body.innerHTML);
   const doc2 = new DOMParser().parseFromString(sanitized, "text/html");
   await renderMermaidIn(doc2.body);
+  await rewriteLocalImages(doc2.body, docDir);
   return doc2.body.innerHTML;
 }

@@ -245,7 +245,7 @@ export default function App() {
     let cancelled = false;
     void (async () => {
       try {
-        const result = await renderPreview(debounced);
+        const result = await renderPreview(debounced, activePath ? dirname(activePath) : null);
         if (!cancelled) setHtml(result);
       } catch (e) {
         console.error("renderPreview failed:", e);
@@ -255,7 +255,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [debounced]);
+  }, [debounced, activePath]);
   const tokens = useMemo(() => countTokens(debounced), [debounced]);
   const fm = useMemo(() => parseFrontmatter(debounced), [debounced]);
   const detected = useMemo(() => detectType(activePath, fm.data, fm.present), [activePath, fm]);
