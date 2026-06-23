@@ -54,7 +54,7 @@ import {
   clearRecent as clearRecentList,
 } from "./lib/recents";
 import type { RecentsBundle } from "./components/RecentsMenu";
-import { loadLayout, saveLayout } from "./lib/api";
+import { loadLayout, saveLayout, loadSession, saveSession } from "./lib/api";
 
 interface OpenDoc {
   id: string;
@@ -353,8 +353,36 @@ export default function App() {
   // from a cold start, plus any files opened while the app is already running.
   const openPathRef = useRef(openPath);
   openPathRef.current = openPath;
+  // True once session restore has run; gates saveSession so the initial empty
+  // state can't overwrite the persisted session before it is loaded.
+  const hydratedRef = useRef(false);
   useEffect(() => {
     void (async () => {
+      // 1. Restore the previous session (folder + last active file) silently —
+      //    stale paths are dropped, not surfaced (see docs/adr/0005).
+      try {
+        const session = await loadSession();
+        if (session?.folder && (await pathExists(session.folder))) {
+          setFolder(session.folder);
+          await refreshFiles(session.folder);
+        }
+        if (session?.activePath && (await pathExists(session.activePath))) {
+          await openPathRef.current(session.activePath);
+          // The restored file replaces the fallback Welcome tab — Welcome is a
+          // pure empty-state, shown only when nothing is restored (ADR 0005).
+          setDocs((ds) =>
+            ds.length > 1
+              ? ds.filter((d) => !(d.id === WELCOME_ID && d.content === d.savedContent))
+              : ds,
+          );
+        }
+      } catch (e) {
+        console.error("Failed to restore session:", e);
+      } finally {
+        hydratedRef.current = true;
+      }
+      // 2. A file-association cold start opens on top of the restored session
+      //    and takes focus; openPath() dedups if it was already restored.
       const launchFile = await takeLaunchFile();
       if (launchFile) void openPathRef.current(launchFile);
     })();
@@ -362,7 +390,15 @@ export default function App() {
     return () => {
       void unlisten.then((fn) => fn());
     };
-  }, []);
+  }, [refreshFiles]);
+
+  // Persist the session (folder + active file) after restore, debounced so rapid
+  // tab switches coalesce into a single write.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    const id = setTimeout(() => void saveSession({ folder, activePath }), 500);
+    return () => clearTimeout(id);
+  }, [folder, activePath]);
 
   const handleOpenFile = useCallback(async () => {
     const fp = await openFileDialog();

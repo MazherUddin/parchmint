@@ -151,6 +151,40 @@ export async function saveLayout(state: LayoutState): Promise<void> {
   }
 }
 
+// ---- Session (workspace folder + last active file) ----------------------
+// Restored on launch so Parchmint reopens where you left off. We persist only
+// paths (re-read from disk on restore), never buffer contents — see
+// docs/adr/0005. Multi-tab restore is deliberately deferred to the recents list.
+
+const SESSION_KEY = "session";
+
+export interface SessionState {
+  /** Last open Workspace folder, or null if none was open. */
+  folder: string | null;
+  /** Path of the active document tab, or null if it was Welcome/untitled. */
+  activePath: string | null;
+}
+
+export async function loadSession(): Promise<SessionState | null> {
+  try {
+    const store = await settingsStore();
+    return (await store.get<SessionState>(SESSION_KEY)) ?? null;
+  } catch (e) {
+    console.error("Failed to load session:", e);
+    return null;
+  }
+}
+
+export async function saveSession(state: SessionState): Promise<void> {
+  try {
+    const store = await settingsStore();
+    await store.set(SESSION_KEY, state);
+    await store.save();
+  } catch (e) {
+    console.error("Failed to save session:", e);
+  }
+}
+
 /**
  * Path Parchmint was launched with via a Windows file association
  * (double-clicking an associated `.md` file on a cold start). Returns null if

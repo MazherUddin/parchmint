@@ -72,6 +72,10 @@ _Avoid_: Favorite, bookmark, starred
 A Workspace the user has deliberately pinned, promoted out of **Recent Workspaces** and never auto-evicted; shown above the recent list. Unpinning returns it to **Recent Workspaces**.
 _Avoid_: Favorite, bookmark, starred
 
+**Session**:
+The state restored on launch so Parchmint reopens where you left off: the last open **Workspace** folder plus the last active **Document**. Only paths are persisted (contents are re-read from disk); restore is best-effort and silent for paths that no longer exist. Full multi-tab restore is deliberately deferred to **Recent Documents**. See docs/adr/0005.
+_Avoid_: State, snapshot, history (reserve "history" for nothing — avoid entirely here)
+
 ## Flagged ambiguities
 
 - The user's original phrase "editor and live viewer" maps to **Source pane** + **Preview pane** respectively. The editing model is split-pane source + live preview — NOT WYSIWYG/inline rendering.
