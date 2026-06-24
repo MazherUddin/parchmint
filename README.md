@@ -11,7 +11,7 @@ with an *honest preview* of exactly what the model will read — not a prettifie
   <img src="docs/demo.gif" alt="Parchmint demo — honest preview of an AI-consumed Markdown document" width="820">
 </p>
 
-> **v0.1.0 — early but usable.** Feedback, issues, and PRs are very welcome.
+> Built and used daily. **v0.1.0** is the first public release — feedback and issues very welcome.
 
 Most Markdown editors optimize for how a document looks to a *human*. When the reader is an
 LLM, what matters is the raw text, its structure, and its token cost. Parchmint shows you
