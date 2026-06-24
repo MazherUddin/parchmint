@@ -62,8 +62,9 @@ npm run tauri build    # produce a release build
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). To report a security issue,
-see [SECURITY.md](SECURITY.md).
+Bug reports, fixes, and ideas are welcome. Parchmint is solo-led — see
+[CONTRIBUTING.md](CONTRIBUTING.md) for what's in scope and how PRs are handled. For security
+issues, see [SECURITY.md](SECURITY.md).
 
 ## License
 
