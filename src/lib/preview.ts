@@ -48,6 +48,10 @@ function transformPseudoTags(container: HTMLElement): void {
     const doc = el.ownerDocument;
     const wrapper = doc.createElement("div");
     wrapper.className = "pseudo-tag";
+    // Carry the source-line stamp (markdown.ts stamps the raw html_block) onto the
+    // replacement wrapper so right-click "Edit here" works over pseudo-tag blocks.
+    const editLine = el.getAttribute("data-edit-line");
+    if (editLine) wrapper.setAttribute("data-edit-line", editLine);
     const label = doc.createElement("div");
     label.className = "pseudo-tag-label";
     label.textContent = tag;

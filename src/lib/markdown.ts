@@ -93,16 +93,41 @@ md.core.ruler.push("edit-source-lines", (state) => {
   }
 });
 
+// Leaf block tokens — indented code, $$ display math, raw HTML blocks (incl.
+// pseudo-tags), and (via the fence override below) code fences + mermaid — are
+// self-contained tokens with nesting 0, so the edit-source-lines rule above (which
+// only stamps nesting:1 open tokens) never reaches them. Their renderers also emit
+// raw HTML and ignore token attributes, so attrSet() wouldn't survive either. Patch
+// the stamp straight into the first opening tag of the rendered string so the
+// Preview's right-click "Edit here" works over these blocks too. A no-tag start
+// (e.g. an HTML comment) simply doesn't match and is left unstamped.
+function stampEditLine(html: string, line: number): string {
+  return html.replace(/^(\s*<[a-zA-Z][\w-]*)/, `$1 data-edit-line="${line}"`);
+}
+
+for (const name of ["code_block", "math_block", "html_block"]) {
+  const prev = md.renderer.rules[name];
+  if (!prev) continue;
+  md.renderer.rules[name] = (tokens, idx, options, env, self) => {
+    const html = prev(tokens, idx, options, env, self);
+    const map = tokens[idx].map;
+    return map ? stampEditLine(html, map[0] + 1) : html;
+  };
+}
+
 // ```mermaid blocks become a <div class="mermaid"> placeholder holding the raw
 // diagram source; PreviewPane renders them to SVG with mermaid.run() once the
-// HTML is in the DOM.
+// HTML is in the DOM. Fenced code (and ```math, handled by the katex fence wrapper
+// that defaultFence delegates to) flows through here too, so stamp it all.
 const defaultFence = md.renderer.rules.fence!;
 md.renderer.rules.fence = (tokens, idx, options, env, self) => {
-  const info = tokens[idx].info.trim().split(/\s+/g)[0];
-  if (info === "mermaid") {
-    return `<div class="mermaid">${escapeHtml(tokens[idx].content)}</div>\n`;
-  }
-  return defaultFence(tokens, idx, options, env, self);
+  const token = tokens[idx];
+  const info = token.info.trim().split(/\s+/g)[0];
+  const html =
+    info === "mermaid"
+      ? `<div class="mermaid">${escapeHtml(token.content)}</div>\n`
+      : defaultFence(tokens, idx, options, env, self);
+  return token.map ? stampEditLine(html, token.map[0] + 1) : html;
 };
 
 export function renderMarkdown(source: string): string {
