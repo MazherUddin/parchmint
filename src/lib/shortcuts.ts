@@ -27,15 +27,24 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: "Keyboard",
     rows: [
+      { kind: "key", combo: [["mod", "K"]], desc: "Command palette" },
       { kind: "key", combo: [["mod", "S"]], desc: "Save" },
       { kind: "key", combo: [["mod", "W"]], desc: "Close tab" },
       { kind: "key", combo: [["mod", "1"]], desc: "Source view" },
       { kind: "key", combo: [["mod", "2"]], desc: "Split view" },
       { kind: "key", combo: [["mod", "3"]], desc: "Preview view" },
-      { kind: "key", combo: [["mod", "B"]], desc: "Toggle sidebar" },
+      { kind: "key", combo: [["mod", "B"]], desc: "Toggle sidebar (outside the editor)" },
       { kind: "key", combo: [["mod", "."]], desc: "Zen mode" },
       { kind: "key", combo: [["Esc"]], desc: "Exit zen mode" },
       { kind: "key", combo: [["mod", "/"]], desc: "Show this help" },
+    ],
+  },
+  {
+    title: "Formatting (in the Source pane)",
+    rows: [
+      { kind: "key", combo: [["mod", "B"]], desc: "Bold" },
+      { kind: "key", combo: [["mod", "I"]], desc: "Italic" },
+      { kind: "gesture", gesture: "Command palette", desc: "Every formatting & insert action (links, lists, tables, math…)" },
     ],
   },
   {

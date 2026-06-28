@@ -15,6 +15,8 @@ For *why* the core design decisions were made, see the [ADRs](./adr/).
   and raise a diff on conflict, never clobbering changes.
 - **Document types & templates** — non-invasive detection of Skill files, ADRs, and
   frontmatter docs, with per-type scaffolds.
+- **Command palette** — `Ctrl`/`Cmd`+`K` to run any command, fuzzy-jump to any workspace
+  file, and apply formatting/insert actions without hand-typing Markdown.
 - **Rich rendering** — GFM, syntax highlighting, KaTeX math, Mermaid diagrams.
 - **Export** — copy as Markdown/selection, standalone HTML, and PDF.
 - **Cross-platform** — Windows, macOS (signed & notarized), and Linux, with native theming.
@@ -25,7 +27,7 @@ For *why* the core design decisions were made, see the [ADRs](./adr/).
   (Tauri updater; needs an update endpoint + signing key). See ADR-0001.
 - **Exact Claude token counts** — an opt-in mode that uses the Anthropic API for exact,
   model-accurate counts, alongside the offline approximate count. See ADR-0002.
-- **Command palette** — keyboard-driven access to every command (Cmd/Ctrl-K).
+- **Workspace search** — find across every file in the workspace, not just the open one.
 
 ## Ideas — under consideration
 

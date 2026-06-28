@@ -4,6 +4,7 @@
 with an *honest preview* of exactly what the model will read — not a prettified render.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/MazherUddin/parchmint/actions/workflows/ci.yml/badge.svg)](https://github.com/MazherUddin/parchmint/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/MazherUddin/parchmint?display_name=tag&sort=semver)](https://github.com/MazherUddin/parchmint/releases/latest)
 ![Platforms](https://img.shields.io/badge/platforms-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-informational)
 
@@ -30,6 +31,9 @@ ingests.
   clobbers an agent's changes.
 - **Document types & templates** — auto-detects Skill files, ADRs, and frontmatter docs
   *non-invasively* (it never edits your text) and scaffolds new ones.
+- **Command palette** — `Ctrl`/`Cmd`+`K` runs any command or fuzzy-jumps to any file in
+  the workspace, so you never hunt menus or hand-type Markdown: bold/italic, headings,
+  lists, links, tables, Mermaid, math, and pseudo-tags are all a keystroke away.
 - **Fast source ↔ preview navigation** — jump to any section from the outline, and
   **right-click rendered text to land on its exact source line**.
 - **A full Markdown editor, too** — GFM, syntax highlighting, KaTeX math, Mermaid diagrams, a

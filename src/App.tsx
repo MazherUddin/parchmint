@@ -12,7 +12,12 @@ import type { ConflictKind } from "./components/ConflictBanner";
 import { ConflictCompare } from "./components/ConflictCompare";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { AboutDialog } from "./components/AboutDialog";
+import { CommandPalette } from "./components/CommandPalette";
+import type { Command } from "./components/CommandPalette";
 import { renderPreview } from "./lib/preview";
+import { wrapInline, setHeading, toggleLinePrefix, makeLink, insertBlock } from "./lib/editFormat";
+import type { Splice } from "./lib/editFormat";
+import { isMacPlatform } from "./lib/shortcuts";
 import { toggleTaskLine } from "./lib/taskToggle";
 import { countTokens } from "./lib/tokens";
 import { lintDocument, extractRelativeLinks } from "./lib/lint";
@@ -147,6 +152,44 @@ function useDebounced<T>(value: T, delay: number): T {
   return debounced;
 }
 
+// Modifier glyph for palette keyboard hints (⌘ on macOS, Ctrl elsewhere).
+const MOD = isMacPlatform() ? "⌘" : "Ctrl";
+
+// Apply a pure Splice (from lib/editFormat) as one CodeMirror transaction, then
+// keep focus in the editor so successive formatting shortcuts compose.
+function applySplice(view: EditorView, s: Splice) {
+  view.dispatch({
+    changes: { from: s.from, to: s.to, insert: s.insert },
+    selection: { anchor: s.selFrom, head: s.selTo },
+    scrollIntoView: true,
+  });
+  view.focus();
+}
+
+// Toggle an inline marker around the current selection (used by the Bold/Italic
+// shortcuts and their palette commands).
+function applyInline(view: EditorView, marker: string) {
+  const { from, to } = view.state.selection.main;
+  applySplice(view, wrapInline(view.state.doc.toString(), from, to, marker));
+}
+
+// Insert-block snippets. `[1]` of each tuple is the placeholder token selected
+// after insertion so the user can immediately type over it.
+const INSERT_TABLE: [string, string] = [
+  ["| Header | Header |", "| --- | --- |", "| Cell | Cell |"].join("\n"),
+  "Header",
+];
+const INSERT_MERMAID: [string, string] = [
+  ["```mermaid", "flowchart LR", "  A[Start] --> B[End]", "```"].join("\n"),
+  "Start",
+];
+const INSERT_MATH: [string, string] = [["$$", "E = mc^2", "$$"].join("\n"), "E = mc^2"];
+const INSERT_CODE: [string, string] = [["```ts", "code", "```"].join("\n"), "code"];
+const INSERT_PSEUDO: [string, string] = [
+  ["<tag-name>", "", "</tag-name>"].join("\n"),
+  "tag-name",
+];
+
 export default function App() {
   const [folder, setFolder] = useState<string | null>(null);
   const [files, setFiles] = useState<MarkdownFile[]>([]);
@@ -182,6 +225,10 @@ export default function App() {
   const [isZen, setIsZen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  // A formatting/insert action requested while the editor was unmounted
+  // (preview-only mode): flushed once onEditorReady fires after switching panes.
+  const pendingEditorActionRef = useRef<((view: EditorView) => void) | null>(null);
 
   // Latest values mirrored into refs so the filesystem-change subscription (set
   // up once) always reconciles against current state without re-subscribing.
@@ -752,6 +799,107 @@ export default function App() {
     window.print();
   }, []);
 
+  // Run an editor action against the live CodeMirror view. In preview-only mode
+  // the editor isn't mounted, so switch to split and defer the action to
+  // onEditorReady (mirrors the "Edit here" deferral via pendingEditLineRef).
+  const withEditor = useCallback(
+    (fn: (view: EditorView) => void) => {
+      const v = viewRef.current;
+      if (v && paneMode !== "preview") {
+        fn(v);
+      } else {
+        pendingEditorActionRef.current = fn;
+        setPaneMode("split");
+      }
+    },
+    [paneMode],
+  );
+
+  const runFormat = useCallback(
+    (fn: (text: string, from: number, to: number) => Splice) => {
+      withEditor((view) => {
+        const { from, to } = view.state.selection.main;
+        applySplice(view, fn(view.state.doc.toString(), from, to));
+      });
+    },
+    [withEditor],
+  );
+
+  const runInsert = useCallback(
+    ([block, token]: [string, string]) => {
+      withEditor((view) => {
+        const { from, to } = view.state.selection.main;
+        applySplice(view, insertBlock(view.state.doc.toString(), from, to, block, token));
+      });
+    },
+    [withEditor],
+  );
+
+  // The palette command list. Format/Insert commands are present only when a
+  // document is open (gated on activeId, which is stable across keystrokes).
+  const hasDoc = activeId !== null;
+  const commands = useMemo<Command[]>(() => {
+    const list: Command[] = [
+      { id: "new", title: "New document", group: "File", run: () => handleNewTyped("plain") },
+      { id: "new-skill", title: "New Skill file", group: "File", keywords: "frontmatter", run: () => handleNewTyped("skill") },
+      { id: "new-adr", title: "New ADR", group: "File", keywords: "decision record", run: () => handleNewTyped("adr") },
+      { id: "new-generic", title: "New Generic doc", group: "File", keywords: "frontmatter", run: () => handleNewTyped("generic") },
+      { id: "open-file", title: "Open file…", group: "File", run: () => void handleOpenFile() },
+      { id: "open-folder", title: "Open folder…", group: "File", keywords: "workspace", run: () => void handleOpenFolder() },
+      { id: "save", title: "Save", group: "File", hint: `${MOD} S`, run: () => void handleSave() },
+      { id: "close", title: "Close tab", group: "File", hint: `${MOD} W`, run: handleCloseActive },
+    ];
+
+    if (hasDoc) {
+      list.push(
+        { id: "bold", title: "Bold", group: "Format", hint: `${MOD} B`, keywords: "strong", run: () => runFormat((t, f, to) => wrapInline(t, f, to, "**")) },
+        { id: "italic", title: "Italic", group: "Format", hint: `${MOD} I`, keywords: "emphasis", run: () => runFormat((t, f, to) => wrapInline(t, f, to, "*")) },
+        { id: "strike", title: "Strikethrough", group: "Format", keywords: "strikethrough", run: () => runFormat((t, f, to) => wrapInline(t, f, to, "~~")) },
+        { id: "code", title: "Inline code", group: "Format", keywords: "monospace", run: () => runFormat((t, f, to) => wrapInline(t, f, to, "`")) },
+        { id: "link", title: "Link", group: "Format", keywords: "url href", run: () => runFormat(makeLink) },
+        { id: "h1", title: "Heading 1", group: "Format", run: () => runFormat((t, f, to) => setHeading(t, f, to, 1)) },
+        { id: "h2", title: "Heading 2", group: "Format", run: () => runFormat((t, f, to) => setHeading(t, f, to, 2)) },
+        { id: "h3", title: "Heading 3", group: "Format", run: () => runFormat((t, f, to) => setHeading(t, f, to, 3)) },
+        { id: "ul", title: "Bullet list", group: "Format", keywords: "unordered", run: () => runFormat((t, f, to) => toggleLinePrefix(t, f, to, "bullet")) },
+        { id: "ol", title: "Numbered list", group: "Format", keywords: "ordered", run: () => runFormat((t, f, to) => toggleLinePrefix(t, f, to, "ordered")) },
+        { id: "quote", title: "Quote", group: "Format", keywords: "blockquote", run: () => runFormat((t, f, to) => toggleLinePrefix(t, f, to, "quote")) },
+        { id: "ins-table", title: "Insert table", group: "Insert", run: () => runInsert(INSERT_TABLE) },
+        { id: "ins-mermaid", title: "Insert Mermaid diagram", group: "Insert", keywords: "flowchart", run: () => runInsert(INSERT_MERMAID) },
+        { id: "ins-math", title: "Insert math block", group: "Insert", keywords: "katex equation", run: () => runInsert(INSERT_MATH) },
+        { id: "ins-code", title: "Insert code block", group: "Insert", keywords: "fenced", run: () => runInsert(INSERT_CODE) },
+        { id: "ins-pseudo", title: "Insert pseudo-tag", group: "Insert", keywords: "xml tag", run: () => runInsert(INSERT_PSEUDO) },
+      );
+    }
+
+    list.push(
+      { id: "view-source", title: "Source view", group: "View", hint: `${MOD} 1`, run: () => setPaneMode("source") },
+      { id: "view-split", title: "Split view", group: "View", hint: `${MOD} 2`, run: () => setPaneMode("split") },
+      { id: "view-preview", title: "Preview view", group: "View", hint: `${MOD} 3`, run: () => setPaneMode("preview") },
+      { id: "toggle-sidebar", title: "Toggle sidebar", group: "View", keywords: "files outline", run: () => setSidebarVisible((s) => !s) },
+      { id: "zen", title: "Zen mode", group: "View", hint: `${MOD} .`, keywords: "focus distraction free", run: () => setIsZen((z) => !z) },
+      { id: "copy-all", title: "Copy document", group: "Export", keywords: "clipboard", run: () => void handleCopyAll() },
+      { id: "copy-sel", title: "Copy selection", group: "Export", keywords: "clipboard", run: () => void handleCopySelection() },
+      { id: "export-html", title: "Export HTML…", group: "Export", run: () => void handleExportHtml() },
+      { id: "export-pdf", title: "Export PDF…", group: "Export", keywords: "print", run: handleExportPdf },
+      { id: "help", title: "Keyboard shortcuts", group: "Help", hint: `${MOD} /`, run: () => setHelpOpen(true) },
+      { id: "about", title: "About Parchmint", group: "Help", run: () => setAboutOpen(true) },
+    );
+    return list;
+  }, [
+    hasDoc,
+    handleNewTyped,
+    handleOpenFile,
+    handleOpenFolder,
+    handleSave,
+    handleCloseActive,
+    handleCopyAll,
+    handleCopySelection,
+    handleExportHtml,
+    handleExportPdf,
+    runFormat,
+    runInsert,
+  ]);
+
   // Check relative links against the filesystem (async, follows the debounce).
   useEffect(() => {
     let cancelled = false;
@@ -859,6 +1007,9 @@ export default function App() {
       } else if (mod && e.key.toLowerCase() === "w") {
         e.preventDefault();
         if (activeId) closeTab(activeId);
+      } else if (mod && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
       } else if (mod && e.key === "1") {
         e.preventDefault();
         setPaneMode("source");
@@ -869,8 +1020,17 @@ export default function App() {
         e.preventDefault();
         setPaneMode("preview");
       } else if (mod && e.key.toLowerCase() === "b") {
+        // Editor focused → Bold; otherwise toggle the sidebar (VS Code's model).
+        const v = viewRef.current;
         e.preventDefault();
-        setSidebarVisible((v) => !v);
+        if (v && v.hasFocus) applyInline(v, "**");
+        else setSidebarVisible((s) => !s);
+      } else if (mod && e.key.toLowerCase() === "i") {
+        const v = viewRef.current;
+        if (v && v.hasFocus) {
+          e.preventDefault();
+          applyInline(v, "*");
+        }
       } else if (mod && e.key === ".") {
         e.preventDefault();
         setIsZen((z) => !z);
@@ -924,6 +1084,13 @@ export default function App() {
       theme={isDark ? "dark" : "light"}
       onEditorReady={(v) => {
         viewRef.current = v;
+        // Flush a formatting/insert action that was requested from preview-only
+        // mode before the editor existed. Next frame so layout has settled.
+        const action = pendingEditorActionRef.current;
+        if (action) {
+          pendingEditorActionRef.current = null;
+          requestAnimationFrame(() => action(v));
+        }
         if (pendingEditLineRef.current !== null) {
           const line = pendingEditLineRef.current;
           pendingEditLineRef.current = null;
@@ -1046,6 +1213,15 @@ export default function App() {
         />
       )}
       {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
+      {paletteOpen && (
+        <CommandPalette
+          commands={commands}
+          files={files}
+          folder={folder}
+          onOpenFile={(p) => void openPath(p)}
+          onClose={() => setPaletteOpen(false)}
+        />
+      )}
       {compareDoc && compareDoc.incomingDisk != null && (
         <ConflictCompare
           mine={compareDoc.content}
