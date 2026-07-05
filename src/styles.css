@@ -310,8 +310,6 @@ body {
 .sidebar-title {
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -371,7 +369,9 @@ body {
 }
 
 .file-group .file-list {
-  padding-left: 10px;
+  /* 12px + 8px item padding = 20px, aligning file text with the group label
+     (6px header padding + 10px caret + 4px gap). */
+  padding-left: 12px;
 }
 
 .file-item {

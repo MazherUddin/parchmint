@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MarkdownFile } from "../lib/api";
 import type { Heading } from "../lib/outline";
 
@@ -28,7 +28,18 @@ function relativeDir(folder: string, filePath: string): string {
 }
 
 export function Sidebar({ folder, files, activePath, onSelect, onOpenFolder, outline, activeLine, onNavigate }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // Folders start collapsed; only the active file's folder is auto-expanded.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setExpanded({});
+  }, [folder]);
+
+  useEffect(() => {
+    if (!activePath || !folder) return;
+    const key = relativeDir(folder, activePath);
+    if (key !== "") setExpanded((e) => (e[key] ? e : { ...e, [key]: true }));
+  }, [folder, activePath]);
 
   const groups = new Map<string, MarkdownFile[]>();
   for (const f of files) {
@@ -43,7 +54,7 @@ export function Sidebar({ folder, files, activePath, onSelect, onOpenFolder, out
     return a.localeCompare(b);
   });
 
-  const toggle = (k: string) => setCollapsed((c) => ({ ...c, [k]: !c[k] }));
+  const toggle = (k: string) => setExpanded((e) => ({ ...e, [k]: !e[k] }));
 
   return (
     <aside className="sidebar">
@@ -65,11 +76,11 @@ export function Sidebar({ folder, files, activePath, onSelect, onOpenFolder, out
             <div className="file-group" key={key || "."}>
               {key !== "" && (
                 <button className="group-header" onClick={() => toggle(key)}>
-                  <span className="group-caret">{collapsed[key] ? "▸" : "▾"}</span>
+                  <span className="group-caret">{expanded[key] ? "▾" : "▸"}</span>
                   {key}
                 </button>
               )}
-              {!collapsed[key] && (
+              {(key === "" || expanded[key]) && (
                 <ul className="file-list">
                   {groups.get(key)!.map((f) => (
                     <li key={f.path}>
