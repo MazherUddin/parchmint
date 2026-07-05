@@ -15,6 +15,8 @@ import { AboutDialog } from "./components/AboutDialog";
 import { CommandPalette } from "./components/CommandPalette";
 import type { Command } from "./components/CommandPalette";
 import { renderPreview } from "./lib/preview";
+import { isMarkdownTarget } from "./lib/linkNav";
+import { resolve as resolvePath } from "@tauri-apps/api/path";
 import { wrapInline, setHeading, toggleLinePrefix, makeLink, insertBlock } from "./lib/editFormat";
 import type { Splice } from "./lib/editFormat";
 import { isMacPlatform } from "./lib/shortcuts";
@@ -395,6 +397,27 @@ export default function App() {
   );
 
   const handleSelectFile = useCallback((f: MarkdownFile) => void openPath(f.path), [openPath]);
+
+  // A local link clicked in the Preview pane: resolve it against the active
+  // Document's folder and open it as a tab. Non-Markdown targets are ignored
+  // (the click is already intercepted, so nothing navigates); the Insights
+  // panel flags broken links before they are ever clicked.
+  const handleOpenLink = useCallback(
+    async (target: string) => {
+      if (!activePath) return; // unsaved Document — no folder to resolve against
+      if (!isMarkdownTarget(target)) {
+        console.warn("Ignoring non-Markdown link target:", target);
+        return;
+      }
+      try {
+        const abs = await resolvePath(dirname(activePath), target);
+        await openPath(abs);
+      } catch (e) {
+        console.error("Failed to open link target:", target, e);
+      }
+    },
+    [activePath, openPath],
+  );
 
   // Open documents handed to Parchmint by a Windows file association: the path
   // from a cold start, plus any files opened while the app is already running.
@@ -1105,7 +1128,12 @@ export default function App() {
   const previewPaneEl = (
     <div className="right-side">
       <div className="preview-scroll" ref={previewScrollRef}>
-        <PreviewPane html={html} onToggleTask={handleToggleTask} onEditAt={handleEditAt} />
+        <PreviewPane
+          html={html}
+          onToggleTask={handleToggleTask}
+          onEditAt={handleEditAt}
+          onOpenLink={(t) => void handleOpenLink(t)}
+        />
       </div>
     </div>
   );
