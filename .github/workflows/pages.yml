@@ -3,13 +3,11 @@
 # (OPEN_SOURCE_PLAN, LAUNCH_AND_PROMO, …) are never exposed.
 name: Deploy site
 
-# Disabled until the repo is public (Phase 5). GitHub Pages on a private repo
-# requires a paid plan, so the push trigger below is commented out to avoid
-# failed runs. Restore the push trigger when flipping public.
+# Auto-deploys on pushes that touch the site; also runnable on demand.
 on:
-  # push:
-  #   branches: [main]
-  #   paths: ["website/**", ".github/workflows/pages.yml"]
+  push:
+    branches: [main]
+    paths: ["website/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
