@@ -294,9 +294,15 @@ body {
   flex: 0 0 220px;
   border-right: 1px solid var(--border);
   background: var(--surface);
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+}
+
+/* Files and Outline scroll independently so a tall tree never hides the outline. */
+.sidebar-files {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .sidebar-header {
@@ -336,10 +342,6 @@ body {
   padding: 4px;
 }
 
-.file-group {
-  margin-bottom: 2px;
-}
-
 .group-header {
   display: flex;
   align-items: center;
@@ -359,19 +361,20 @@ body {
 .group-caret {
   font-size: 10px;
   width: 10px;
-  display: inline-block;
+  flex: 0 0 10px;
+}
+
+.tree-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .file-list {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.file-group .file-list {
-  /* 12px + 8px item padding = 20px, aligning file text with the group label
-     (6px header padding + 10px caret + 4px gap). */
-  padding-left: 12px;
 }
 
 .file-item {
@@ -404,6 +407,10 @@ body {
 .sidebar-outline {
   border-top: 1px solid var(--border);
   padding: 4px 4px 8px;
+  /* Never squeezed by a tall file tree — content-sized up to the cap, then scrolls. */
+  flex: 0 0 auto;
+  max-height: 40%;
+  overflow-y: auto;
 }
 
 .sidebar-section-label {
