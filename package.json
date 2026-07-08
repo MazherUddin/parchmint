@@ -1,7 +1,7 @@
 {
   "name": "parchmint",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "A Markdown editor for AI-consumed documents — write docs, prompts, and skill files with an honest preview of exactly what the model will read.",
   "author": "Abu Mazher Uddin <mazher@gmail.com>",
