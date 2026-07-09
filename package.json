@@ -18,7 +18,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "tauri": "tauri",
-    "release": "pwsh ./scripts/release.ps1"
+    "release": "pwsh ./scripts/release.ps1",
+    "version": "node scripts/sync-version.mjs && git add src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock"
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.5.0",
