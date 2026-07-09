@@ -22,6 +22,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -35,6 +37,7 @@
       Parchmint
     </a>
     <nav class="nav-links">
+      <a href="#demo">Demo</a>
       <a href="#what">The idea</a>
       <a href="#features">Features</a>
       <a href="#download">Download</a>
@@ -111,7 +114,7 @@ Write <span class="t-strong">**once**</span>, ship clean.</code></pre>
             </div>
           </div>
           <div class="editor-foot">
-            <span class="meter"><span class="meter-dot"></span> 1,248 tokens</span>
+            <span class="meter"><span class="meter-dot"></span> ~1,248 tokens</span>
             <span class="meter-ok">0 warnings</span>
             <span class="meter-type">type: skill</span>
           </div>
@@ -119,9 +122,26 @@ Write <span class="t-strong">**once**</span>, ship clean.</code></pre>
       </div>
     </section>
 
+    <!-- ░░ THE REAL THING ░░ -->
+    <section id="demo" class="demo">
+      <p class="section-kicker">01 — In the app</p>
+      <h2 class="reveal-on-scroll">Not a mockup.<br />The <em>actual</em> editor.</h2>
+      <figure class="demo-figure reveal-on-scroll">
+        <img
+          src="demo.gif"
+          width="2564" height="1532" loading="lazy" decoding="async"
+          alt="Parchmint editing a Markdown document: raw source on the left, the honest preview on the right, with a live outline, token estimate and lint warnings." />
+        <figcaption>
+          Raw source on the left, the honest preview on the right. Pseudo-tags like
+          <code>&lt;what-to-do&gt;</code> surface as labeled blocks instead of silently vanishing,
+          while the outline, detected document type and token estimate update as you type.
+        </figcaption>
+      </figure>
+    </section>
+
     <!-- ░░ THE IDEA ░░ -->
     <section id="what" class="idea">
-      <p class="section-kicker">01 — The idea</p>
+      <p class="section-kicker">02 — The idea</p>
       <h2 class="reveal-on-scroll">
         What you see is<br />what the model <em>gets.</em>
       </h2>
@@ -151,7 +171,7 @@ You are a <span class="t-strong">**precise**</span> editor.
 
     <!-- ░░ FEATURES ░░ -->
     <section id="features" class="features">
-      <p class="section-kicker">02 — What's inside</p>
+      <p class="section-kicker">03 — What's inside</p>
       <h2 class="reveal-on-scroll">A workshop for documents<br />with a machine audience.</h2>
       <div class="feature-grid">
         <article class="feature reveal-on-scroll">
@@ -162,7 +182,7 @@ You are a <span class="t-strong">**precise**</span> editor.
         <article class="feature reveal-on-scroll">
           <span class="f-num">02</span>
           <h3>Token meter &amp; warnings</h3>
-          <p>Live token count as you type, with token-level warnings before a document blows past the budget you're writing for.</p>
+          <p>A live token <em>estimate</em> as you type, with warnings before a document blows past the budget you're writing for. Counts use OpenAI's o200k tokenizer — exact for GPT models, approximate (~±10–15%) for Claude and others.</p>
         </article>
         <article class="feature reveal-on-scroll">
           <span class="f-num">03</span>
@@ -189,7 +209,7 @@ You are a <span class="t-strong">**precise**</span> editor.
 
     <!-- ░░ DOWNLOAD ░░ -->
     <section id="download" class="download">
-      <p class="section-kicker">03 — Take it home</p>
+      <p class="section-kicker">04 — Take it home</p>
       <h2 class="reveal-on-scroll">Download Parchmint</h2>
       <p class="dl-lede reveal-on-scroll">Free, open source, MIT-licensed. Pick your platform — every build comes from the latest release.</p>
       <div class="dl-grid">

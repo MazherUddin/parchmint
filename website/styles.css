@@ -385,7 +385,7 @@ body {
 .meter-type { margin-left: auto; color: var(--ink-faint); }
 
 /* ============================================================ SECTIONS */
-section.idea, section.features, section.download {
+section.demo, section.idea, section.features, section.download {
   max-width: var(--maxw);
   margin: 0 auto;
   padding: clamp(64px, 9vw, 130px) clamp(24px, 5vw, 56px);
@@ -407,6 +407,30 @@ section h2 {
   margin-bottom: 30px;
 }
 section h2 em { font-style: italic; font-weight: 500; color: var(--mint); }
+
+/* ---- the real thing (product demo) ---- */
+.demo { border-top: 1px solid var(--line-soft); }
+.demo-figure {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--paper-3);
+  box-shadow: 0 34px 70px -46px rgba(34, 29, 20, 0.6), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+}
+.demo-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid var(--line-soft);
+}
+.demo-figure figcaption {
+  padding: 20px clamp(16px, 2.5vw, 30px);
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 76ch;
+}
 
 /* ---- the idea ---- */
 .idea { border-top: 1px solid var(--line-soft); }
