@@ -1149,6 +1149,63 @@ body.dragging-col {
   padding: 2px 0;
 }
 
+/* Default-editor nudge card (bottom-right, above the status bar) -------- */
+.default-prompt {
+  position: fixed;
+  right: 16px;
+  bottom: 38px;
+  width: 320px;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  font-size: 13px;
+  z-index: 50;
+}
+
+.default-prompt-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.default-prompt-body {
+  margin-top: 6px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.default-prompt-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.default-prompt-actions button {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.default-prompt-actions button:hover {
+  background: var(--accent-soft);
+}
+
+.default-prompt-actions .default-prompt-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.default-prompt-actions .default-prompt-primary:hover {
+  background: var(--accent);
+  opacity: 0.9;
+}
+
 /* Toast ---------------------------------------------------------------- */
 .toast {
   position: fixed;

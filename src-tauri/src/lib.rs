@@ -1,3 +1,5 @@
+mod default_handler;
+
 use serde::Serialize;
 use std::fs;
 use std::path::Path;
@@ -189,6 +191,10 @@ pub fn run() {
                 }
             }
 
+            // Repair handler registration (Windows) — installer updates can wipe
+            // the ProgId, which silently breaks double-click-to-open.
+            default_handler::ensure_registered(app.handle());
+
             // Per-OS window background material. Windows keeps Mica; macOS gets
             // vibrancy; Linux has no native equivalent and stays opaque (handled
             // in CSS via the os-linux class). transparent:true (in tauri.conf)
@@ -215,7 +221,9 @@ pub fn run() {
             link_exists,
             path_exists,
             take_launch_file,
-            set_watch_roots
+            set_watch_roots,
+            default_handler::default_handler_status,
+            default_handler::make_default_md_handler
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

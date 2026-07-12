@@ -43,7 +43,7 @@
     "fileAssociations": [
       {
         "ext": ["md", "markdown"],
-        "name": "Markdown Document",
+        "name": "Parchmint.md",
         "description": "Markdown document",
         "role": "Editor"
       }

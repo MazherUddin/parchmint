@@ -15,6 +15,12 @@ describe("fuzzyMatch", () => {
     expect(fuzzyMatch("itb", "Insert table")).not.toBeNull();
   });
 
+  it("matches when the boundary-preferring pass overshoots (greedy fallback)", () => {
+    // `d` lands on "default", the boundary pass then jumps `e` ahead to
+    // "editor", stranding `f` — the greedy fallback must still match.
+    expect(fuzzyMatch("defa", "Set as default Markdown editor")).not.toBeNull();
+  });
+
   it("is case-insensitive", () => {
     expect(fuzzyMatch("INS", "insert")).not.toBeNull();
     expect(fuzzyMatch("ins", "INSERT")).not.toBeNull();
