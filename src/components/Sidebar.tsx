@@ -12,6 +12,7 @@ interface SidebarProps {
   outline: Heading[];
   activeLine: number | null;
   onNavigate: (heading: Heading) => void;
+  width: number;
 }
 
 function folderName(p: string): string {
@@ -92,7 +93,7 @@ function TreeChildren({ dir, depth, expanded, onToggle, activePath, onSelect }: 
   );
 }
 
-export function Sidebar({ folder, files, activePath, onSelect, onOpenFolder, outline, activeLine, onNavigate }: SidebarProps) {
+export function Sidebar({ folder, files, activePath, onSelect, onOpenFolder, outline, activeLine, onNavigate, width }: SidebarProps) {
   // Folders start collapsed; only the active file's ancestor chain is auto-expanded.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -117,7 +118,7 @@ export function Sidebar({ folder, files, activePath, onSelect, onOpenFolder, out
   const toggle = (k: string) => setExpanded((e) => ({ ...e, [k]: !e[k] }));
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" style={{ flexBasis: width }}>
       <div className="sidebar-header">
         <span className="sidebar-title" title={folder ?? undefined}>
           {folder ? folderName(folder) : "No folder"}

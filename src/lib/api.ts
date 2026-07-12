@@ -129,6 +129,8 @@ const LAYOUT_KEY = "layout";
 export interface LayoutState {
   paneMode: "source" | "split" | "preview";
   sidebarVisible: boolean;
+  /** Absent in layouts saved before sidebar resizing existed. */
+  sidebarWidth?: number;
 }
 
 export async function loadLayout(): Promise<LayoutState | null> {

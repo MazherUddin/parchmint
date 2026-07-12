@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { EditorView } from "@codemirror/view";
 import { Tabs } from "./components/Tabs";
 import type { PaneMode } from "./components/Tabs";
@@ -67,6 +68,7 @@ import {
 } from "./lib/recents";
 import type { RecentsBundle } from "./components/RecentsMenu";
 import { loadLayout, saveLayout, loadSession, saveSession } from "./lib/api";
+import { clampSidebarWidth, SIDEBAR_DEFAULT_WIDTH } from "./lib/sidebarWidth";
 
 interface OpenDoc {
   id: string;
@@ -229,6 +231,7 @@ export default function App() {
   const [compareId, setCompareId] = useState<string | null>(null);
   const [paneMode, setPaneMode] = useState<PaneMode>("split");
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const [isZen, setIsZen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -268,16 +271,52 @@ export default function App() {
       if (layout) {
         setPaneMode(layout.paneMode);
         setSidebarVisible(layout.sidebarVisible);
+        setSidebarWidth(clampSidebarWidth(layout.sidebarWidth, window.innerWidth));
       }
       layoutLoadedRef.current = true;
     })();
   }, []);
 
-  // Persist layout whenever it changes (skip the initial render).
+  // Persist layout whenever it changes (skip the initial render). Width is
+  // read from a ref, not a dep: drag frames update state per-frame but only
+  // commitSidebarWidth (drag release / reset) should hit disk.
+  const sidebarWidthRef = useRef(sidebarWidth);
+  sidebarWidthRef.current = sidebarWidth;
   useEffect(() => {
     if (!layoutLoadedRef.current) return;
-    void saveLayout({ paneMode, sidebarVisible });
+    void saveLayout({ paneMode, sidebarVisible, sidebarWidth: sidebarWidthRef.current });
   }, [paneMode, sidebarVisible]);
+
+  const commitSidebarWidth = useCallback(
+    (width: number) => {
+      const w = clampSidebarWidth(width, window.innerWidth);
+      setSidebarWidth(w);
+      if (layoutLoadedRef.current) void saveLayout({ paneMode, sidebarVisible, sidebarWidth: w });
+    },
+    [paneMode, sidebarVisible],
+  );
+
+  // Live width follows the pointer; disk write happens once on release.
+  const startSidebarDrag = useCallback(
+    (e: ReactMouseEvent) => {
+      e.preventDefault();
+      let w = sidebarWidthRef.current;
+      const onMove = (ev: MouseEvent) => {
+        w = clampSidebarWidth(ev.clientX, window.innerWidth);
+        setSidebarWidth(w);
+      };
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        document.body.classList.remove("dragging-sidebar");
+        commitSidebarWidth(w);
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+      document.body.classList.add("dragging-sidebar");
+    },
+    [commitSidebarWidth],
+  );
 
   // Apply a pure recents transform and persist the result. setRecents-on-load
   // bypasses this, so we never write the empty initial state over stored data.
@@ -1243,16 +1282,25 @@ export default function App() {
       )}
       <div className="body">
         {!isZen && sidebarVisible && (
-          <Sidebar
-            folder={folder}
-            files={files}
-            activePath={activePath}
-            onSelect={handleSelectFile}
-            onOpenFolder={handleOpenFolder}
-            outline={outline}
-            activeLine={activeLine}
-            onNavigate={handleNavigate}
-          />
+          <>
+            <Sidebar
+              folder={folder}
+              files={files}
+              activePath={activePath}
+              onSelect={handleSelectFile}
+              onOpenFolder={handleOpenFolder}
+              outline={outline}
+              activeLine={activeLine}
+              onNavigate={handleNavigate}
+              width={sidebarWidth}
+            />
+            <div
+              className="sidebar-divider"
+              onMouseDown={startSidebarDrag}
+              onDoubleClick={() => commitSidebarWidth(SIDEBAR_DEFAULT_WIDTH)}
+              title="Drag to resize · double-click to reset"
+            />
+          </>
         )}
         {paneContent}
       </div>

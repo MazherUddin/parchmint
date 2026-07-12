@@ -291,11 +291,32 @@ body {
 }
 
 .sidebar {
-  flex: 0 0 220px;
+  flex: 0 0 220px; /* basis overridden inline by the persisted width */
+  /* Without min-width:0 a flex item's min-width is its content's min-content
+     size, so one long nowrap label silently widens the whole sidebar and the
+     ellipsis never fires. max-width keeps a saved width sane on small windows. */
+  min-width: 0;
+  max-width: 50vw;
   border-right: 1px solid var(--border);
   background: var(--surface);
   display: flex;
   flex-direction: column;
+}
+
+/* Grab zone straddling the sidebar's right edge; occupies no layout width. */
+.sidebar-divider {
+  flex: 0 0 5px;
+  margin-left: -3px;
+  margin-right: -2px;
+  z-index: 5;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.sidebar-divider:hover,
+body.dragging-sidebar .sidebar-divider {
+  background: var(--accent);
 }
 
 /* Files and Outline scroll independently so a tall tree never hides the outline. */
@@ -475,7 +496,8 @@ body.dragging-col .split-divider {
   background: var(--accent);
 }
 
-body.dragging-col {
+body.dragging-col,
+body.dragging-sidebar {
   cursor: col-resize;
   user-select: none;
 }
@@ -1269,6 +1291,7 @@ body.dragging-col {
 @media print {
   .tabs,
   .sidebar,
+  .sidebar-divider,
   .insights,
   .statusbar,
   .split-divider,
