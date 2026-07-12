@@ -1,6 +1,6 @@
 [package]
 name = "parchmint"
-version = "0.1.1"
+version = "0.2.0"
 description = "Parchmint — a Markdown editor for AI-consumed documents"
 authors = ["Abu Mazher Uddin <mazher@gmail.com>"]
 license = "MIT"
