@@ -31,6 +31,14 @@ export function fuzzyMatch(query: string, target: string): FuzzyResult | null {
   if (query.length === 0) return { score: 0, positions: [] };
   if (query.length > target.length) return null;
 
+  // The boundary-preferring pass gives better positions ("doc" lands on the start
+  // of "Document") but can overshoot and strand the rest of the query ("defa" vs
+  // "Set as default Markdown editor": jumping `e` to "editor" leaves no `f`). The
+  // plain greedy pass never overshoots, so it decides matchability.
+  return matchFrom(query, target, true) ?? matchFrom(query, target, false);
+}
+
+function matchFrom(query: string, target: string, preferBoundaries: boolean): FuzzyResult | null {
   const q = query.toLowerCase();
   const t = target.toLowerCase();
   const positions: number[] = [];
@@ -46,7 +54,7 @@ export function fuzzyMatch(query: string, target: string): FuzzyResult | null {
     // Prefer a boundary occurrence over the first greedy hit when one is nearby —
     // keeps "doc" matching "Document" at the start rather than mid-word.
     let at = found;
-    if (!isBoundary(target, found)) {
+    if (preferBoundaries && !isBoundary(target, found)) {
       const boundaryHit = nextBoundaryOccurrence(target, t, ch, found + 1);
       if (boundaryHit !== -1) at = boundaryHit;
     }

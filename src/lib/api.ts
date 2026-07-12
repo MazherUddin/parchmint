@@ -185,6 +185,46 @@ export async function saveSession(state: SessionState): Promise<void> {
   }
 }
 
+// ---- Default Markdown editor ---------------------------------------------
+
+/** `unavailable` = becoming default is impossible here (bare Linux AppImage). */
+export type DefaultHandlerStatus = "default" | "not_default" | "unavailable";
+
+export function defaultHandlerStatus(): Promise<DefaultHandlerStatus> {
+  return invoke<DefaultHandlerStatus>("default_handler_status");
+}
+
+/**
+ * Try to become the default Markdown editor. Resolves to "set" when switched
+ * directly (macOS/Linux) or "settings_opened" when the user must finish the
+ * switch in Windows Settings (defaults are user-choice protected there).
+ */
+export function makeDefaultMdHandler(): Promise<"set" | "settings_opened"> {
+  return invoke<"set" | "settings_opened">("make_default_md_handler");
+}
+
+const DEFAULT_PROMPT_KEY = "defaultEditorPromptDone";
+
+/** Whether the one-time "make default?" prompt has already been answered. */
+export async function loadDefaultPromptDone(): Promise<boolean> {
+  try {
+    const store = await settingsStore();
+    return (await store.get<boolean>(DEFAULT_PROMPT_KEY)) ?? false;
+  } catch {
+    return true; // fail closed: never nag if persistence is broken
+  }
+}
+
+export async function saveDefaultPromptDone(): Promise<void> {
+  try {
+    const store = await settingsStore();
+    await store.set(DEFAULT_PROMPT_KEY, true);
+    await store.save();
+  } catch (e) {
+    console.error("Failed to save default-prompt flag:", e);
+  }
+}
+
 /**
  * Path Parchmint was launched with via a Windows file association
  * (double-clicking an associated `.md` file on a cold start). Returns null if

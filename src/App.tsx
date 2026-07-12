@@ -14,6 +14,7 @@ import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { AboutDialog } from "./components/AboutDialog";
 import { CommandPalette } from "./components/CommandPalette";
 import type { Command } from "./components/CommandPalette";
+import { DefaultEditorPrompt } from "./components/DefaultEditorPrompt";
 import { renderPreview } from "./lib/preview";
 import { isMarkdownTarget } from "./lib/linkNav";
 import { resolve as resolvePath } from "@tauri-apps/api/path";
@@ -50,7 +51,11 @@ import {
   saveRecents,
   onCloseRequested,
   confirmDiscard,
+  defaultHandlerStatus,
+  loadDefaultPromptDone,
+  saveDefaultPromptDone,
 } from "./lib/api";
+import type { DefaultHandlerStatus } from "./lib/api";
 import type { RecentsState } from "./lib/recents";
 import {
   emptyRecents,
@@ -228,6 +233,8 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // Non-null renders the default-editor card (value = status when it opened).
+  const [defaultPrompt, setDefaultPrompt] = useState<DefaultHandlerStatus | null>(null);
   // A formatting/insert action requested while the editor was unmounted
   // (preview-only mode): flushed once onEditorReady fires after switching panes.
   const pendingEditorActionRef = useRef<((view: EditorView) => void) | null>(null);
@@ -461,6 +468,31 @@ export default function App() {
       void unlisten.then((fn) => fn());
     };
   }, [refreshFiles]);
+
+  // One-time default-editor nudge: after startup settles, offer to become the
+  // default .md handler. Never auto-shown again once answered (the flag), when
+  // already default, or when defaults can't be set here (bare AppImage).
+  useEffect(() => {
+    const id = setTimeout(() => {
+      void (async () => {
+        try {
+          if (await loadDefaultPromptDone()) return;
+          const status = await defaultHandlerStatus();
+          if (status === "not_default") setDefaultPrompt(status);
+        } catch (e) {
+          console.error("Default-handler check failed:", e);
+        }
+      })();
+    }, 1500);
+    return () => clearTimeout(id);
+  }, []);
+
+  // Any way the card closes counts as answered — the palette command remains
+  // the way to revisit it.
+  const handleDefaultPromptClose = useCallback(() => {
+    setDefaultPrompt(null);
+    void saveDefaultPromptDone();
+  }, []);
 
   // Persist the session (folder + active file) after restore, debounced so rapid
   // tab switches coalesce into a single write.
@@ -905,6 +937,13 @@ export default function App() {
       { id: "export-html", title: "Export HTML…", group: "Export", run: () => void handleExportHtml() },
       { id: "export-pdf", title: "Export PDF…", group: "Export", keywords: "print", run: handleExportPdf },
       { id: "help", title: "Keyboard shortcuts", group: "Help", hint: `${MOD} /`, run: () => setHelpOpen(true) },
+      {
+        id: "set-default",
+        title: "Set as default Markdown editor",
+        group: "Help",
+        keywords: "file association md open with",
+        run: () => void defaultHandlerStatus().then(setDefaultPrompt).catch(console.error),
+      },
       { id: "about", title: "About Parchmint", group: "Help", run: () => setAboutOpen(true) },
     );
     return list;
@@ -1259,6 +1298,7 @@ export default function App() {
           onClose={() => setCompareId(null)}
         />
       )}
+      {defaultPrompt && <DefaultEditorPrompt status={defaultPrompt} onClose={handleDefaultPromptClose} />}
       {toast && <div className="toast">{toast.text}</div>}
     </div>
   );
